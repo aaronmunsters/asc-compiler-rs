@@ -1,0 +1,48 @@
+name: Rust - Cargo Build, Test & Clippy
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
+  BUN_VERSION: "v1.1.43"
+  ASSEMBLYSCRIPT_VERSION: "0.27.27"
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update rustup
+        run: rustup update ${RUST_CHANNEL} && rustup default ${RUST_CHANNEL}
+        shell: bash
+      - name: Install Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v2.1.5
+      - name: Build all targets with all features
+        run: cargo build
+        shell: bash
+      - name: Install latest nextest release
+        uses: taiki-e/install-action@nextest
+      - run: cargo nextest run
+      - run: cargo nextest run --no-default-features --features deno
+
+  clippy_check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update rustup
+        run: rustup update ${RUST_CHANNEL} && rustup default ${RUST_CHANNEL}
+      - name: Install clippy
+        run: rustup component add clippy
+      - name: Install wasm & wasip1 as a rust target
+        run: rustup target add wasm32-unknown-unknown wasm32-wasip1
+        shell: bash
+      - name: Lint (clippy)
+        run: cargo clippy --all-features --all-targets
+        shell: bash

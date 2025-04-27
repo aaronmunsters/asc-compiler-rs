@@ -1,0 +1,19 @@
+[package]
+name = "asc-compiler-rs"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = ["nodejs"]
+nodejs = []
+bun = []
+deno = []
+
+[dependencies]
+tempfile = { version = "3.16" }
+thiserror = { version = "2" }
+cfg-if = { version = "1.0.0" }
+
+[dev-dependencies]
+wasmtime = { version = "32.0" }
+strum = { version = "0.27", features = ["derive"] }
